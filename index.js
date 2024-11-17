@@ -109,6 +109,7 @@ app.delete('/movies/:id', (req, res) => {
 
 const PORT = process.env.PORT ?? 1234;
 
-app.listen(PORT, () => {
+// Cambia 'localhost' a '0.0.0.0' para permitir el acceso externo
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server listening on port http://localhost:${PORT}`);
 });
