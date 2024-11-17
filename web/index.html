@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Probar Api Rest</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif; /* Tipo de letra general */
+        background-color: #f4f4f4; /* Color de fondo suave */
+        margin: 0; /* Eliminar margen por defecto */
+        padding: 20px; /* Espaciado alrededor del contenido */
+      }
+
+      main {
+        max-width: 800px; /* Ancho máximo del contenedor principal */
+        margin: 0 auto; /* Centrar el contenedor */
+      }
+
+      article {
+        background-color: #fff; /* Fondo blanco para los artículos */
+        border: 1px solid #ddd; /* Borde más claro */
+        border-radius: 8px; /* Bordes redondeados */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra para dar profundidad */
+        padding: 1.5rem; /* Espaciado interior */
+        margin-bottom: 1.5rem; /* Espaciado inferior */
+        transition: transform 0.3s; /* Animación suave para la interacción */
+      }
+
+      article:hover {
+        transform: translateY(-5px); /* Efecto al pasar el mouse */
+      }
+
+      h2 {
+        color: #333; /* Color del título */
+        font-size: 1.5rem; /* Tamaño del texto del título */
+        margin-bottom: 0.5rem; /* Espaciado inferior */
+      }
+
+      p {
+        color: #666; /* Color del texto del párrafo */
+        line-height: 1.5; /* Espaciado entre líneas */
+      }
+
+      img {
+        height: auto; /* Mantener proporciones */
+        width: 100%; /* Ancho completo del contenedor */
+        max-width: 100%; /* Sin exceder el ancho del contenedor */
+        border-radius: 4px; /* Bordes redondeados para la imagen */
+      }
+    </style>
+    <script type="module">
+      fetch('http://localhost:1234/movies')
+        .then((res) => res.json())
+        .then((movies) => {
+          const html = movies
+            .map((movie) => {
+              return `
+                <article data-id="${movie.id}">
+                  <h2>${movie.title}</h2>
+                  <img src="${movie.poster}" alt="${movie.title}">
+                  <p>${movie.year}</p>
+  
+                  <button>Eliminar</button>
+                </article>
+              `;
+            })
+            .join('');
+
+          document.querySelector('main').innerHTML = html;
+
+          document.addEventListener('click', (e) => {
+            if (e.target.matches('button')) {
+              const article = e.target.closest('article');
+              const id = article.dataset.id;
+
+              fetch(`http://localhost:1234/movies/${id}`, {
+                method: 'DELETE',
+              }).then((res) => {
+                console.log(res);
+                if (res.ok) {
+                  article.remove();
+                }
+              });
+            }
+          });
+        });
+    </script>
+  </head>
+  <body>
+    <main></main>
+  </body>
+</html>
