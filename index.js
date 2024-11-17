@@ -111,5 +111,5 @@ const PORT = process.env.PORT ?? 1234;
 
 // Cambia 'localhost' a '0.0.0.0' para permitir el acceso externo
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server listening on port http://localhost:${PORT}`);
+  console.log(`Server listening on port ${PORT}`);
 });
