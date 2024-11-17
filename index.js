@@ -1,8 +1,7 @@
 import express, { json } from 'express';
-import movies from './movies.json' assert { type: 'json' };
+import movies from './movies.json' with { type: 'json' };
 import crypto from 'crypto'; //Se utiliza para generar ID aleatorias
 import validateMovie, { validatePartialMovie } from './schemas/movies.js'; //De acá se crean y se validan las películas.
-import { error } from 'console';
 import cors from 'cors';
 const app = express();
 
