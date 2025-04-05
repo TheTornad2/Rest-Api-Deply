@@ -1,12 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
-import validateMovie, { validatePartialMovie } from '../schemas/movies.js'; // De acá se crean y se validan las películas.
+import validateMovie, { validatePartialMovie } from '../schemas/movies.js';
 import { MovieModel } from '../models/movie.js';
 
 const moviesRouter = Router();
 
-//! Get all movies
-
+// Obtener todas las películas (con filtro por género)
 moviesRouter.get('/', (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
   const { genre } = req.query;
@@ -14,76 +13,58 @@ moviesRouter.get('/', (req, res) => {
   res.json(movies);
 });
 
-//! Get movies by id.
-
+// Obtener película por ID
 moviesRouter.get('/:id', (req, res) => {
   const { id } = req.params;
-  const movie = movies.find((movie) => movie.id === id);
+  const movie = MovieModel.getById({ id }); // Usa el modelo
   if (movie) return res.json(movie);
-  res.status(404).json({ message: 'movie not found' });
+  res.status(404).json({ message: 'Movie not found' });
 });
 
-//! Create Movies.
-
+// Crear película
 moviesRouter.post('/', (req, res) => {
-  const result = validateMovie(req.body); // Si al hacer el post y valida que es incorrecto lo que le pasamos, pasamos el error
+  const result = validateMovie(req.body);
 
   if (result.error) {
-    //! También podemos utilizar el 422
     return res.status(400).json({ error: JSON.parse(result.error.message) });
   }
 
-  //! ... se utiliza para poder copiar todo de la variable a otro lado, no hay problema que copiemos todo porque está validado.
   const newMovie = {
     id: randomUUID(),
     ...result.data,
   };
 
-  // Esto no sería REST, porque estamos guardando el estado de la aplicación en memoria.
-
-  movies.push(newMovie);
-
+  MovieModel.create({ input: newMovie }); // Usa el modelo
   res.status(201).json(newMovie);
 });
 
-//! Update the movies.
-
-moviesRouter.patch('/', (req, res) => {
+// Actualizar película (PATCH)
+moviesRouter.patch('/:id', (req, res) => {
+  // ¡Falta :id en la ruta!
   const result = validatePartialMovie(req.body);
 
   if (!result.success) {
-    res.status(400).json({ error: JSON.parse(result.error.message) });
+    return res.status(400).json({ error: JSON.parse(result.error.message) });
   }
 
   const { id } = req.params;
+  const updatedMovie = MovieModel.update({ id, input: result.data }); // Usa el modelo
 
-  const movieIndex = movies.findIndex((movie) => movie.id === id);
-
-  if (movieIndex === -1) {
+  if (!updatedMovie) {
     return res.status(404).json({ message: 'Movie not found' });
   }
 
-  const updateMovie = {
-    ...movies[movieIndex],
-    ...result.data,
-  };
-
-  movies[movieIndex] = updateMovie;
-
-  return res.json(updateMovie);
+  return res.json(updatedMovie);
 });
 
-//! Delete the movies.
-
+// Eliminar película
 moviesRouter.delete('/:id', (req, res) => {
   const { id } = req.params;
-  const movieIndex = movies.findIndex((movie) => movie.id === id);
+  const deleted = MovieModel.delete({ id }); // Usa el modelo
 
-  if (movieIndex === -1) {
+  if (!deleted) {
     return res.status(404).json({ message: 'Movie not found' });
   }
-
-  movies.splice(movieIndex, 1);
 
   return res.json({ message: 'Movie deleted' });
 });
